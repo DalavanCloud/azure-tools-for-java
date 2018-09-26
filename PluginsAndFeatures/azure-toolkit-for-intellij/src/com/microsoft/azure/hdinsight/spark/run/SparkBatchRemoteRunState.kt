@@ -33,13 +33,14 @@ import com.microsoft.azure.hdinsight.common.HDInsightUtil
 import com.microsoft.azure.hdinsight.common.MessageInfoType
 import com.microsoft.azure.hdinsight.spark.common.SparkSubmitModel
 import com.microsoft.intellij.hdinsight.messages.HDInsightBundle
+import com.microsoft.azure.hdinsight.common.logger.ILogger
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.net.URI
 import java.util.*
 
 open class SparkBatchRemoteRunState(val serverlessSparkSubmitModel: SparkSubmitModel)
-    : RunProfileStateWithAppInsightsEvent, SparkBatchRemoteRunProfileState  {
+    : RunProfileStateWithAppInsightsEvent, SparkBatchRemoteRunProfileState, ILogger  {
     override var remoteProcessCtrlLogHandler: SparkBatchJobProcessCtrlLogOut? = null
     override var executionResult: ExecutionResult? = null
     override var consoleView: ConsoleView? = null
@@ -71,7 +72,9 @@ open class SparkBatchRemoteRunState(val serverlessSparkSubmitModel: SparkSubmitM
                         err.printStackTrace(PrintWriter(errWriter))
 
                         val errMessage = Optional.ofNullable(err.message)
-                                .orElse(err.toString()) + "\n stack trace: " + errWriter.buffer.toString()
+                                .orElse(err.toString())
+
+                        log().error(errMessage + "\n stack trace: "+ errWriter.buffer.toString())
 
                         createAppInsightEvent(it, mapOf(
                                 "IsSubmitSucceed" to "false",
